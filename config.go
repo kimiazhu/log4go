@@ -186,6 +186,9 @@ func xmlToFileLogWriter(filename string, excludes []string, props []xmlProperty,
 			abspath, _ := exec.LookPath(os.Args[0])
 			dir := filepath.Dir(abspath)
 			file = filepath.Join(dir, strings.Trim(prop.Value, " \r\n"))
+			if _, err := os.Stat(filepath.Dir(file)); os.IsNotExist(err) {
+				os.MkdirAll(filepath.Dir(file), os.ModeDir)
+			}
 		case "format":
 			format = strings.Trim(prop.Value, " \r\n")
 		case "maxlines":
