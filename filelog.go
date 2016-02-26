@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"time"
-	"syscall"
 	"github.com/kimiazhu/log4go/support"
 )
 
