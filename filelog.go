@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"syscall"
+	"github.com/kimiazhu/log4go/support"
 )
 
 // This log writer sends output to a file
@@ -33,7 +35,7 @@ type FileLogWriter struct {
 
 	// Rotate daily
 	daily bool
-	//	daily_opendate int
+	// daily_opendate int
 	daily_opendaystr string
 
 	// Keep old logfiles (.001, .002, etc)
@@ -74,6 +76,16 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 	if err := w.intRotate(); err != nil {
 		fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
 		return nil
+	}
+
+	// get create time
+	if w.daily_opendaystr == "" {
+		_, ctime, _, err := support.GetStatTime(w.filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
+			return nil
+		}
+		w.daily_opendaystr = ctime.Format("2006-01-02")
 	}
 
 	go func() {
@@ -139,7 +151,6 @@ func (w *FileLogWriter) intRotate() error {
 	if w.rotate {
 		_, err := os.Lstat(w.filename)
 		if err == nil { // file exists
-			// Find the next available number
 			num := 1
 			fname := ""
 			todayDate := time.Now().Format("2006-01-02")
