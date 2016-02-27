@@ -14,6 +14,20 @@ I hava change some features and done with some bugfixes. Include:
 
 6. Auto load configuration in init() method, when the `log4go.xml` placed in exec dir or `{exec_dir}/conf` dir.
 
+7. Add access log. example:
+
+		<filter enabled="true">
+			<tag>access</tag> <!-- the tag of accesslog MUST be access -->
+			<type>file</type>
+			<level>ACCESS</level> <!-- the level of accesslog MUST be access -->
+			<property name="filename">log/access.log</property>
+			<property name="format">[%D %T] [%L] %M</property>
+			<property name="rotate">true</property>
+			<property name="maxsize">100M</property>
+			<property name="maxlines">100K</property>
+			<property name="daily">true</property>
+		</filter>
+
 ### Installation:
 - Run `go get github.com/kimiazhu/log4go`
 

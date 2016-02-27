@@ -4,9 +4,9 @@ package log4go
 
 import (
 	"fmt"
+	"github.com/kimiazhu/log4go/support"
 	"os"
 	"time"
-	"github.com/kimiazhu/log4go/support"
 )
 
 // This log writer sends output to a file

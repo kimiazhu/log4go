@@ -6,9 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
-	"path/filepath"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 var (
