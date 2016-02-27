@@ -214,6 +214,25 @@ func Info(arg0 interface{}, args ...interface{}) {
 	}
 }
 
+// Utility for Access log messages (see Debug() for parameter explanation)
+// Wrapper for (*Logger).Info
+func Access(arg0 interface{}, args ...interface{}) {
+	const (
+		lvl = ACCESS
+	)
+	switch first := arg0.(type) {
+	case string:
+		// Use the string as a format string
+		Global.intLogf(lvl, first, args...)
+	case func() string:
+		// Log the closure (no other arguments used)
+		Global.intLogc(lvl, first)
+	default:
+		// Build a format string so that it will be similar to Sprint
+		Global.intLogf(lvl, fmt.Sprint(arg0)+strings.Repeat(" %v", len(args)), args...)
+	}
+}
+
 // Utility for warn log messages (returns an error for easy function returns) (see Debug() for parameter explanation)
 // These functions will execute a closure exactly once, to build the error message for the return
 // Wrapper for (*Logger).Warn

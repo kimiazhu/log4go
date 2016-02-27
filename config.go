@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
-	"strings"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type xmlProperty struct {
@@ -24,7 +24,7 @@ type xmlFilter struct {
 	Level    string        `xml:"level"`
 	Type     string        `xml:"type"`
 	Property []xmlProperty `xml:"property"`
-	Exclude []string `xml:"exclude"`
+	Exclude  []string      `xml:"exclude"`
 }
 
 type xmlLoggerConfig struct {
@@ -81,6 +81,8 @@ func (log Logger) LoadConfiguration(filename string) {
 		}
 
 		switch xmlfilt.Level {
+		case "ACCESS":
+			lvl = ACCESS
 		case "FINEST":
 			lvl = FINEST
 		case "FINE":
@@ -187,7 +189,7 @@ func xmlToFileLogWriter(filename string, excludes []string, props []xmlProperty,
 			dir := filepath.Dir(abspath)
 			file = filepath.Join(dir, strings.Trim(prop.Value, " \r\n"))
 			if _, err := os.Stat(filepath.Dir(file)); os.IsNotExist(err) {
-				os.MkdirAll(filepath.Dir(file), os.ModeDir)
+				os.MkdirAll(filepath.Dir(file), os.ModeDir | os.ModePerm)
 			}
 		case "format":
 			format = strings.Trim(prop.Value, " \r\n")

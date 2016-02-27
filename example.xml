@@ -3,10 +3,23 @@
     <tag>stdout</tag>
     <type>console</type>
     <!-- level is (:?FINEST|FINE|DEBUG|TRACE|INFO|WARNING|ERROR) -->
-    <level>DEBUG</level>
+    <level>ACCESS</level>
     <exclude>github.com/example</exclude>
     <exclude>github.com/sample</exclude>
   </filter>
+
+  <filter enabled="true">
+    <tag>access</tag> <!-- the tag of accesslog MUST be access -->
+    <type>file</type>
+    <level>ACCESS</level><!-- the level of accesslog MUST be access -->
+    <property name="filename">log/access.log</property>
+    <property name="format">[%D %T] [%L] %M</property>
+    <property name="rotate">true</property>
+    <property name="maxsize">100M</property>
+    <property name="maxlines">100K</property>
+    <property name="daily">true</property>
+  </filter>
+
   <filter enabled="true">
     <tag>file</tag>
     <type>file</type>

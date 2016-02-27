@@ -21,6 +21,9 @@ I hava change some features and done with some bugfixes. Include:
 - Add the following import:
 import log "github.com/kimiazhu/log4go"
 
+### TODO:
+- special logger need to write its own file. e.g. only access log can write the access.log file
+
 ### Acknowledgements:
 - pomack
   For providing awesome patches to bring log4go up to the latest Go spec

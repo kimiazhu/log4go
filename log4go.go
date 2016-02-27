@@ -74,7 +74,8 @@ const (
 type Level int
 
 const (
-	FINEST Level = iota
+	ACCESS Level = iota
+	FINEST
 	FINE
 	DEBUG
 	TRACE
@@ -86,7 +87,7 @@ const (
 
 // Logging level strings
 var (
-	levelStrings = [...]string{"FNST", "FINE", "DEBG", "TRAC", "INFO", "WARN", "EROR", "CRIT"}
+	levelStrings = [...]string{"ACCE", "FNST", "FINE", "DEBG", "TRAC", "INFO", "WARN", "EROR", "CRIT"}
 )
 
 func (l Level) String() string {
@@ -193,7 +194,7 @@ func (log Logger) intLogf(lvl Level, format string, args ...interface{}) {
 
 	// Determine if any logging will be done
 	for _, filt := range log {
-		if lvl >= filt.Level {
+		if lvl == ACCESS || lvl >= filt.Level {
 			skip = false
 			break
 		}
@@ -223,11 +224,12 @@ func (log Logger) intLogf(lvl Level, format string, args ...interface{}) {
 	}
 
 	// Dispatch the logs
-	for _, filt := range log {
-		if lvl < filt.Level || filt.excluded(src) {
-			continue
+	for tag, filt := range log {
+		if lvl == ACCESS && tag == "access" && !(filt.excluded(src)) {
+			filt.LogWrite(rec)
+		} else if tag != "access" && lvl >= filt.Level && (!filt.excluded(src)) {
+			filt.LogWrite(rec)
 		}
-		filt.LogWrite(rec)
 	}
 }
 
@@ -237,7 +239,7 @@ func (log Logger) intLogc(lvl Level, closure func() string) {
 
 	// Determine if any logging will be done
 	for _, filt := range log {
-		if lvl >= filt.Level {
+		if lvl == ACCESS || lvl >= filt.Level {
 			skip = false
 			break
 		}
@@ -262,11 +264,12 @@ func (log Logger) intLogc(lvl Level, closure func() string) {
 	}
 
 	// Dispatch the logs
-	for _, filt := range log {
-		if lvl < filt.Level {
-			continue
+	for tag, filt := range log {
+		if lvl == ACCESS && tag == "access" && !(filt.excluded(src)) {
+			filt.LogWrite(rec)
+		} else if tag != "access" && lvl >= filt.Level && (!filt.excluded(src)) {
+			filt.LogWrite(rec)
 		}
-		filt.LogWrite(rec)
 	}
 }
 
@@ -276,7 +279,7 @@ func (log Logger) Log(lvl Level, source, message string) {
 
 	// Determine if any logging will be done
 	for _, filt := range log {
-		if lvl >= filt.Level {
+		if lvl == ACCESS || lvl >= filt.Level {
 			skip = false
 			break
 		}
@@ -294,11 +297,12 @@ func (log Logger) Log(lvl Level, source, message string) {
 	}
 
 	// Dispatch the logs
-	for _, filt := range log {
-		if lvl < filt.Level {
-			continue
+	for tag, filt := range log {
+		if lvl == ACCESS && tag == "access" && !(filt.excluded(source)) {
+			filt.LogWrite(rec)
+		} else if tag != "access" && lvl >= filt.Level && (!filt.excluded(source)) {
+			filt.LogWrite(rec)
 		}
-		filt.LogWrite(rec)
 	}
 }
 
@@ -405,6 +409,26 @@ func (log Logger) Trace(arg0 interface{}, args ...interface{}) {
 func (log Logger) Info(arg0 interface{}, args ...interface{}) {
 	const (
 		lvl = INFO
+	)
+	switch first := arg0.(type) {
+	case string:
+		// Use the string as a format string
+		log.intLogf(lvl, first, args...)
+	case func() string:
+		// Log the closure (no other arguments used)
+		log.intLogc(lvl, first)
+	default:
+		// Build a format string so that it will be similar to Sprint
+		log.intLogf(lvl, fmt.Sprint(arg0)+strings.Repeat(" %v", len(args)), args...)
+	}
+}
+
+// Info logs a message at the Access log level.
+// See Debug for an explanation of the arguments.
+// The tag of access log MUST be <tag>access</tag>
+func (log Logger) Access(arg0 interface{}, args ...interface{}) {
+	const (
+		lvl = ACCESS
 	)
 	switch first := arg0.(type) {
 	case string:
