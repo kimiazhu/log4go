@@ -10,9 +10,9 @@ func init() {
 	_support = &supportUnix{}
 }
 
-type supportUnix struct {}
+type supportUnix struct{}
 
-func (t *supportUnix)StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
+func (t *supportUnix) StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
 	fi, err := os.Stat(filepath)
 	if err != nil {
 		return

@@ -161,7 +161,7 @@ func TestXMLLogWriter(t *testing.T) {
 		t.Errorf("read(%q): %s", testLogFile, err)
 	} else {
 		fmt.Println(string(contents))
-		if (runtime.GOOS == "windows") {
+		if runtime.GOOS == "windows" {
 			// on windows the line breaker is 2 bytes(\r\n)
 			if len(contents) != 205 {
 				t.Errorf("malformed xmllog: %q (%d bytes)", string(contents), len(contents))

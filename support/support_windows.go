@@ -1,18 +1,18 @@
 package support
 
 import (
-	"time"
 	"os"
 	"syscall"
+	"time"
 )
 
 func init() {
 	_support = &supportWin{}
 }
 
-type supportWin struct {}
+type supportWin struct{}
 
-func (t *supportWin)StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
+func (t *supportWin) StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
 	fi, err := os.Lstat(filepath)
 	if err != nil {
 		return

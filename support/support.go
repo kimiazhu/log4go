@@ -2,7 +2,7 @@ package support
 
 import "time"
 
-type support interface  {
+type support interface {
 	StatTimes(filepath string) (atime, ctime, mtime time.Time, err error)
 }
 

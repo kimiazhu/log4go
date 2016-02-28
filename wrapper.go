@@ -20,7 +20,9 @@ func init() {
 	Global = NewDefaultLogger(DEBUG)
 	file, _ := exec.LookPath(os.Args[0])
 	dir := filepath.Dir(file)
-	if _, err := os.Stat(filepath.Join(dir, "/log4go.xml")); !os.IsNotExist(err) {
+	if _, err := os.Stat("log4go.xml"); !os.IsNotExist(err) {
+		Global.LoadConfiguration("log4go.xml")
+	} else if _, err := os.Stat(filepath.Join(dir, "/log4go.xml")); !os.IsNotExist(err) {
 		Global.LoadConfiguration(filepath.Join(dir, "log4go.xml"))
 	} else if _, err := os.Stat(filepath.Join(dir, "/conf/log4go.xml")); !os.IsNotExist(err) {
 		Global.LoadConfiguration(filepath.Join(dir, "/conf/log4go.xml"))
