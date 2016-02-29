@@ -7,12 +7,12 @@ import (
 )
 
 func init() {
-	_support = &supportUnix{}
+	_support = &supportDarwin{}
 }
 
-type supportUnix struct{}
+type supportDarwin struct{}
 
-func (t *supportUnix) StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
+func (t *supportDarwin) StatTimes(filepath string) (atime, ctime, mtime time.Time, err error) {
 	fi, err := os.Stat(filepath)
 	if err != nil {
 		return
