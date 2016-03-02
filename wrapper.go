@@ -287,7 +287,7 @@ func Error(arg0 interface{}, args ...interface{}) error {
 
 // Utility for critical log messages (returns an error for easy function returns) (see Debug() for parameter explanation)
 // These functions will execute a closure exactly once, to build the error message for the return
-// Wrapper for (*Logger).Critical
+// Wrapper for (*Logger).Critical. This method will log the call stack
 func Critical(arg0 interface{}, args ...interface{}) error {
 	const (
 		lvl = CRITICAL
@@ -295,16 +295,20 @@ func Critical(arg0 interface{}, args ...interface{}) error {
 	switch first := arg0.(type) {
 	case string:
 		// Use the string as a format string
-		Global.intLogf(lvl, first, args...)
+		msg := fmt.Sprintf("%s\n%s", fmt.Sprintf(first, args...), CallStack(3))
+		Global.intLogf(lvl, msg)
+		//Global.intLogf(lvl, "%s", CallStack(3))
 		return errors.New(fmt.Sprintf(first, args...))
 	case func() string:
 		// Log the closure (no other arguments used)
 		str := first()
-		Global.intLogf(lvl, "%s", str)
+		Global.intLogf(lvl, "%s\n%s", str, CallStack(3))
+		//Global.intLogf(lvl, "%s", CallStack(3))
 		return errors.New(str)
 	default:
 		// Build a format string so that it will be similar to Sprint
-		Global.intLogf(lvl, fmt.Sprint(first)+strings.Repeat(" %v", len(args)), args...)
+		msg := fmt.Sprintf("%s\n%s", fmt.Sprint(first) + fmt.Sprintf(strings.Repeat(" %v", len(args)), args...), CallStack(3))
+		Global.intLogf(lvl, msg)
 		return errors.New(fmt.Sprint(first) + fmt.Sprintf(strings.Repeat(" %v", len(args)), args...))
 	}
 	return nil

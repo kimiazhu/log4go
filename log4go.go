@@ -83,6 +83,7 @@ const (
 	WARNING
 	ERROR
 	CRITICAL
+	FATAL
 )
 
 // Logging level strings
@@ -493,7 +494,7 @@ func (log Logger) Error(arg0 interface{}, args ...interface{}) error {
 
 // Critical logs a message at the critical log level and returns the formatted error,
 // See Warn for an explanation of the performance and Debug for an explanation
-// of the parameters.
+// of the parameters. This method will log the error stacks
 func (log Logger) Critical(arg0 interface{}, args ...interface{}) error {
 	const (
 		lvl = CRITICAL
@@ -502,13 +503,14 @@ func (log Logger) Critical(arg0 interface{}, args ...interface{}) error {
 	switch first := arg0.(type) {
 	case string:
 		// Use the string as a format string
-		msg = fmt.Sprintf(first, args...)
+		msg = fmt.Sprintf(first+"\n%s", args, CallStack(3))
 	case func() string:
 		// Log the closure (no other arguments used)
-		msg = first()
+		//msg = first()
+		msg = fmt.Sprintf("%s\n%s", first(), CallStack(3))
 	default:
 		// Build a format string so that it will be similar to Sprint
-		msg = fmt.Sprintf(fmt.Sprint(first)+strings.Repeat(" %v", len(args)), args...)
+		msg = fmt.Sprintf("%s\n%s",fmt.Sprintf(fmt.Sprint(first)+strings.Repeat(" %v", len(args))+"\n%s", args...),CallStack(3))
 	}
 	log.intLogf(lvl, msg)
 	return errors.New(msg)
