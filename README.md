@@ -28,6 +28,8 @@ I hava change some features and done with some bugfixes. Include:
 			<property name="daily">true</property>
 		</filter>
 
+8. When you call log4go.Critical(), it will print the trace stack. I Also added a Recover() method to print stack only when there is a panic, otherwise it will print log as Error()
+
 ### Installation:
 - Run `go get github.com/kimiazhu/log4go`
 
