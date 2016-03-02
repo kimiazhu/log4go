@@ -313,3 +313,11 @@ func Critical(arg0 interface{}, args ...interface{}) error {
 	}
 	return nil
 }
+
+func Recover(arg0 interface{}, args ...interface{}) {
+	if err := recover(); err != nil {
+		Critical(arg0, args...)
+	} else {
+		Error(arg0, args...)
+	}
+}
