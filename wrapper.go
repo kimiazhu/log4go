@@ -305,6 +305,10 @@ func Critical(arg0 interface{}, args ...interface{}) error {
 		Global.intLogf(lvl, "%s\n%s", str, CallStack(3))
 		//Global.intLogf(lvl, "%s", CallStack(3))
 		return errors.New(str)
+	case func(interface{}) string:
+		str := first(args[0])
+		Global.intLogf(lvl, "%s\n%s", str, CallStack(3))
+		return errors.New(str)
 	default:
 		// Build a format string so that it will be similar to Sprint
 		msg := fmt.Sprintf("%s\n%s", fmt.Sprint(first) + fmt.Sprintf(strings.Repeat(" %v", len(args)), args...), CallStack(3))
@@ -314,9 +318,22 @@ func Critical(arg0 interface{}, args ...interface{}) error {
 	return nil
 }
 
+// Recover used to log the stack when panic occur.
+// usage: defer log4go.Recover("this is a msg: %v", "msg")
+// or:
+//      defer log4go.Recover(func(err interface{}) string {
+//          // ... your code here, return the error message
+//          return fmt.Sprintf("recover..v1=%v;v2=%v;err=%v", 1, 2, err)
+//      })
 func Recover(arg0 interface{}, args ...interface{}) {
 	if err := recover(); err != nil {
-		Critical(arg0, args...)
+		switch arg0.(type) {
+		case func(interface{}) string:
+			// the recovered err will pass to this func
+			Critical(arg0, append([]interface{}{err}, args)...)
+		default:
+			Critical(arg0, args...)
+		}
 	} else {
 		Error(arg0, args...)
 	}
