@@ -30,6 +30,15 @@ I hava change some features and done with some bugfixes. Include:
 
 8. When you call log4go.Critical(), it will print the trace stack. I Also added a Recover() method to print stack only when there is a panic, otherwise it will print log as Error()
 
+	`usage:`
+	
+		defer log4go.Recover("this is a msg: %v", "msg")
+		// or
+		defer log4go.Recover(func(err interface{}) string {
+            // ... put your code here, construct the error message and return
+            return fmt.Sprintf("recover..v1=%v;v2=%v;err=%v", 1, 2, err)
+        })
+
 ### Installation:
 - Run `go get github.com/kimiazhu/log4go`
 
