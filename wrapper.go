@@ -327,12 +327,14 @@ func Critical(arg0 interface{}, args ...interface{}) error {
 //      })
 func Recover(arg0 interface{}, args ...interface{}) {
 	if err := recover(); err != nil {
-		switch arg0.(type) {
+		switch a := arg0.(type) {
 		case func(interface{}) string:
 			// the recovered err will pass to this func
 			Critical(arg0, append([]interface{}{err}, args)...)
+		case string:
+			Critical(a+"\n%v", append(args, err)...)
 		default:
-			Critical(arg0, args...)
+			Critical(arg0, append(args, err)...)
 		}
 	}
 }
