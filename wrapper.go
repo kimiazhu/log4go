@@ -334,7 +334,5 @@ func Recover(arg0 interface{}, args ...interface{}) {
 		default:
 			Critical(arg0, args...)
 		}
-	} else {
-		Error(arg0, args...)
 	}
 }
