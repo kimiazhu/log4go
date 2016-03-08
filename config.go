@@ -31,6 +31,45 @@ type xmlLoggerConfig struct {
 	Filter []xmlFilter `xml:"filter"`
 }
 
+// jsonConfig used to setup a single filelog.
+// this usually for a client app.
+type jsonConfig struct {
+	Level    string `json:"level"`
+	Filename string `json:"filename"`
+	Format   string `json:"format"`
+	Maxlines string `json:"maxlines"`
+	Maxsize  string `json:"maxsize"`
+	Excludes string `json:"excludes"`
+}
+
+// Setup Can set the file logger by a json config string.
+// It is shorthand for config the filelog without an xml
+// config file.(...For NOW).
+//
+// This is usually used for a client app which always write
+// a single log file.
+//
+// config example:
+//	{
+//  "level":"DEBUG",
+//	"filename":"log/all.log",
+//  "format":"[%D %T] [%L] (%S) %M",
+//	"maxlines":"100K",
+//	"maxsize":"100M",
+//  "excludes":"github.com/example,github.com/example2"
+//	}
+// NOTE: rotate and daily properties will allways true
+func (log Logger) SetupFileLog(cnf *jsonConfig) {
+	lvl, bad := convertLevel(cnf.Level, cnf.Filename)
+	excludes := strings.Split(cnf.Excludes, ",")
+	props := []xmlProperty{{"filename",cnf.Filename}, {"maxlines", cnf.Maxlines}, {"maxsize", cnf.Maxsize}, {"daily", "true"}, {"rotate", "true"}}
+	filt, good := xmlToFileLogWriter(cnf.Filename, excludes, props, true)
+	if bad || !good {
+		os.Exit(1)
+	}
+	log["file"] = &Filter{lvl, filt, excludes}
+}
+
 // Load XML configuration; see examples/example.xml for documentation
 func (log Logger) LoadConfiguration(filename string) {
 	fmt.Fprintf(os.Stdout, "Load log4go configuration: %s\n", filename)
@@ -80,29 +119,7 @@ func (log Logger) LoadConfiguration(filename string) {
 			bad = true
 		}
 
-		switch xmlfilt.Level {
-		case "ACCESS":
-			lvl = ACCESS
-		case "FINEST":
-			lvl = FINEST
-		case "FINE":
-			lvl = FINE
-		case "DEBUG":
-			lvl = DEBUG
-		case "TRACE":
-			lvl = TRACE
-		case "INFO":
-			lvl = INFO
-		case "WARNING":
-			lvl = WARNING
-		case "ERROR":
-			lvl = ERROR
-		case "CRITICAL":
-			lvl = CRITICAL
-		default:
-			fmt.Fprintf(os.Stderr, "LoadConfiguration: Error: Required child <%s> for filter has unknown value in %s: %s\n", "level", filename, xmlfilt.Level)
-			bad = true
-		}
+		lvl, bad = convertLevel(xmlfilt.Level, filename)
 
 		// Just so all of the required attributes are errored at the same time if missing
 		if bad {
@@ -135,6 +152,33 @@ func (log Logger) LoadConfiguration(filename string) {
 
 		log[xmlfilt.Tag] = &Filter{lvl, filt, xmlfilt.Exclude}
 	}
+}
+
+func convertLevel(level, filename string) (lvl Level, bad bool) {
+	switch level {
+	case "ACCESS":
+		lvl = ACCESS
+	case "FINEST":
+		lvl = FINEST
+	case "FINE":
+		lvl = FINE
+	case "DEBUG":
+		lvl = DEBUG
+	case "TRACE":
+		lvl = TRACE
+	case "INFO":
+		lvl = INFO
+	case "WARNING":
+		lvl = WARNING
+	case "ERROR":
+		lvl = ERROR
+	case "CRITICAL":
+		lvl = CRITICAL
+	default:
+		fmt.Fprintf(os.Stderr, "LoadConfiguration: Error: Required child <%s> for filter has unknown value in %s: %s\n", "level", filename, level)
+		bad = true
+	}
+	return
 }
 
 func xmlToConsoleLogWriter(filename string, excludes []string, props []xmlProperty, enabled bool) (*ConsoleLogWriter, bool) {
@@ -173,6 +217,7 @@ func strToNumSuffix(str string, mult int) int {
 	parsed, _ := strconv.Atoi(str)
 	return parsed * num
 }
+
 func xmlToFileLogWriter(filename string, excludes []string, props []xmlProperty, enabled bool) (*FileLogWriter, bool) {
 	file := ""
 	format := "[%D %T] [%L] (%S) %M"

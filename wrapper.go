@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"encoding/json"
 )
 
 var (
@@ -29,6 +30,33 @@ func init() {
 	} else {
 		fmt.Fprintf(os.Stdout, "log4go config not found, exec dir is: %s, u need to load it by yourself.\n", dir)
 	}
+}
+
+// Setup Can set the file logger by a json config string.
+// It is shorthand for config the filelog without an xml
+// config file.(...For NOW).
+//
+// This is usually used for a client app which always write
+// a single log file.
+//
+// config example:
+//	{
+//  "level":"DEBUG",
+//	"filename":"log/all.log",
+//  "format":"[%D %T] [%L] (%S) %M",
+//	"maxlines":"100K",
+//	"maxsize":"100M",
+//  "excludes":"github.com/example,github.com/example2"
+//	}
+// NOTE: rotate and daily properties will allways true
+func SetupFileLog(config string) {
+	cnf := jsonConfig{}
+	err := json.Unmarshal([]byte(config), &cnf)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "setup log4go failed, config is not valid: %v", err)
+		return
+	}
+	Global.SetupFileLog(&cnf)
 }
 
 // Wrapper for (*Logger).LoadConfiguration

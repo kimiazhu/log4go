@@ -39,6 +39,22 @@ I hava change some features and done with some bugfixes. Include:
             return fmt.Sprintf("recover..v1=%v;v2=%v;err=%v", 1, 2, err)
         })
 
+9. Add JSON format config for a single file log. This often used by client app which usually setup a single file to record all log.
+
+	`usage:`
+
+		cnf := `
+		{
+			"level":"DEBUG",
+			"filename":"logs/all.log",
+			"format":"[%D %T] [%L] (%S) %M",
+			"maxlines":"100K",
+			"maxsize":"100M",
+			"excludes":"github.com/example,github.com/example2"
+		}`
+		log4go.SetupFileLog(cnf)
+		log4go.Debug("test debug")
+
 ### Installation:
 - Run `go get github.com/kimiazhu/log4go`
 
@@ -47,7 +63,7 @@ I hava change some features and done with some bugfixes. Include:
 import log "github.com/kimiazhu/log4go"
 
 ### TODO:
-
+- when the server restart, the maxline and the maxsize maybe exceeded??
 
 ### Acknowledgements:
 - pomack
