@@ -47,7 +47,7 @@ I hava change some features and done with some bugfixes. Include:
 import log "github.com/kimiazhu/log4go"
 
 ### TODO:
-- special logger need to write its own file. e.g. only access log can write the access.log file
+
 
 ### Acknowledgements:
 - pomack
