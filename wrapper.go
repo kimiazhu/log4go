@@ -27,7 +27,7 @@ func init() {
 	} else if _, err := os.Stat(filepath.Join(dir, "/conf/log4go.xml")); !os.IsNotExist(err) {
 		Global.LoadConfiguration(filepath.Join(dir, "/conf/log4go.xml"))
 	} else {
-		fmt.Fprintf(os.Stdout, "log4go config not found, exec dir is: %s, u need to load it by yourself.\n", dir)
+		fmt.Fprintf(os.Stderr, "log4go config not found, exec dir is: %s, u need to load it by yourself.\n", dir)
 	}
 }
 
