@@ -29,8 +29,8 @@ type FileLogWriter struct {
 	maxlines_curlines int
 
 	// Rotate at size
-	maxsize         int
-	maxsize_cursize int
+	maxsize         int64
+	maxsize_cursize int64
 
 	// Rotate daily
 	daily bool
@@ -87,6 +87,9 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 		w.daily_opendaystr = ctime.Format("2006-01-02")
 	}
 
+	w.maxlines_curlines = support.GetLines(w.filename)
+	w.maxsize_cursize = support.GetSize(w.filename)
+
 	go func() {
 		defer func() {
 			if w.file != nil {
@@ -107,8 +110,8 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 					return
 				}
 				now := time.Now()
-				if (w.maxlines > 0 && w.maxlines_curlines >= w.maxlines) ||
-					(w.maxsize > 0 && w.maxsize_cursize >= w.maxsize) ||
+				if (w.maxlines > 0 && w.maxlines_curlines > w.maxlines) ||
+					(w.maxsize > 0 && w.maxsize_cursize > w.maxsize) ||
 					(w.daily && now.Format("2006-01-02") != w.daily_opendaystr) {
 					if err := w.intRotate(); err != nil {
 						fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
@@ -125,7 +128,7 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 
 				// Update the counts
 				w.maxlines_curlines++
-				w.maxsize_cursize += n
+				w.maxsize_cursize += int64(n)
 			}
 		}
 	}()
@@ -170,8 +173,8 @@ func (w *FileLogWriter) intRotate() error {
 				} else {
 					fname = w.filename + fmt.Sprintf(".%s", w.daily_opendaystr)
 				}
-			} else if (w.maxlines > 0 && w.maxlines_curlines >= w.maxlines) ||
-				(w.maxsize > 0 && w.maxsize_cursize >= w.maxsize) {
+			} else if (w.maxlines > 0 && w.maxlines_curlines > w.maxlines) ||
+				(w.maxsize > 0 && w.maxsize_cursize > w.maxsize) {
 				// maxlines or maxsize reached, create new log and rename the old
 				num = w.maxbackup - 1
 				for ; num >= 1; num-- {
@@ -245,7 +248,7 @@ func (w *FileLogWriter) SetRotateLines(maxlines int) *FileLogWriter {
 
 // Set rotate at size (chainable). Must be called before the first log message
 // is written.
-func (w *FileLogWriter) SetRotateSize(maxsize int) *FileLogWriter {
+func (w *FileLogWriter) SetRotateSize(maxsize int64) *FileLogWriter {
 	//fmt.Fprintf(os.Stderr, "FileLogWriter.SetRotateSize: %v\n", maxsize)
 	w.maxsize = maxsize
 	return w

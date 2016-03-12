@@ -231,7 +231,7 @@ func xmlToFileLogWriter(excludes []string, props []xmlProperty, enabled bool) (*
 	flw := NewFileLogWriter(file, rotate)
 	flw.SetFormat(format)
 	flw.SetRotateLines(maxlines)
-	flw.SetRotateSize(maxsize)
+	flw.SetRotateSize(int64(maxsize))
 	flw.SetRotateDaily(daily)
 	return flw, true
 }
@@ -276,7 +276,7 @@ func xmlToXMLLogWriter(excludes []string, props []xmlProperty, enabled bool) (*F
 
 	xlw := NewXMLLogWriter(file, rotate)
 	xlw.SetRotateLines(maxrecords)
-	xlw.SetRotateSize(maxsize)
+	xlw.SetRotateSize(int64(maxsize))
 	xlw.SetRotateDaily(daily)
 	return xlw, true
 }
