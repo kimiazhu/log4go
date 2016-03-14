@@ -121,7 +121,7 @@ func TestFileLogWriter(t *testing.T) {
 	}(LogBufferLength)
 	LogBufferLength = 0
 
-	w := NewFileLogWriter(testLogFile, false)
+	w := NewFileLogWriter(testLogFile, false, false)
 	if w == nil {
 		t.Fatalf("Invalid return: w should not be nil")
 	}
@@ -147,7 +147,7 @@ func TestXMLLogWriter(t *testing.T) {
 	}(LogBufferLength)
 	LogBufferLength = 0
 
-	w := NewXMLLogWriter(testLogFile, false)
+	w := NewXMLLogWriter(testLogFile, false, false)
 	if w == nil {
 		t.Fatalf("Invalid return: w should not be nil")
 	}
@@ -245,7 +245,7 @@ func TestLogOutput(t *testing.T) {
 	l := make(Logger)
 
 	// Delete and open the output log without a timestamp (for a constant md5sum)
-	l.AddFilter("file", FINEST, NewFileLogWriter(testLogFile, false).SetFormat("[%L] %M"))
+	l.AddFilter("file", FINEST, NewFileLogWriter(testLogFile, false, false).SetFormat("[%L] %M"))
 	defer os.Remove(testLogFile)
 
 	// Send some log messages
@@ -496,7 +496,7 @@ func BenchmarkConsoleUtilNotLog(b *testing.B) {
 func BenchmarkFileLog(b *testing.B) {
 	sl := make(Logger)
 	b.StopTimer()
-	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false))
+	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false, false))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		sl.Log(WARNING, "here", "This is a log message")
@@ -508,7 +508,7 @@ func BenchmarkFileLog(b *testing.B) {
 func BenchmarkFileNotLogged(b *testing.B) {
 	sl := make(Logger)
 	b.StopTimer()
-	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false))
+	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false, false))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		sl.Log(DEBUG, "here", "This is a log message")
@@ -520,7 +520,7 @@ func BenchmarkFileNotLogged(b *testing.B) {
 func BenchmarkFileUtilLog(b *testing.B) {
 	sl := make(Logger)
 	b.StopTimer()
-	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false))
+	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false, false))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		sl.Info("%s is a log message", "This")
@@ -532,7 +532,7 @@ func BenchmarkFileUtilLog(b *testing.B) {
 func BenchmarkFileUtilNotLog(b *testing.B) {
 	sl := make(Logger)
 	b.StopTimer()
-	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false))
+	sl.AddFilter("file", INFO, NewFileLogWriter("benchlog.log", false, false))
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
 		sl.Debug("%s is a log message", "This")

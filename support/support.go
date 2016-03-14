@@ -21,6 +21,7 @@ func GetStatTime(filepath string) (atime, ctime, mtime time.Time, err error) {
 
 func GetLines(filepath string) int {
 	fd, err := os.Open(filepath)
+	defer fd.Close()
 	if err != nil {
 		return -1
 	}

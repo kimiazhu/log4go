@@ -61,14 +61,26 @@ func (w *FileLogWriter) Close() {
 //
 // The standard log-line format is:
 //   [%D %T] [%L] (%S) %M
-func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
+func NewFileLogWriter(fname string, rotate, daily bool) *FileLogWriter {
 	w := &FileLogWriter{
 		rec:       make(chan *LogRecord, LogBufferLength),
 		rot:       make(chan bool),
 		filename:  fname,
 		format:    "[%D %T] [%L] (%S) %M",
 		rotate:    rotate,
+		daily:     daily,
 		maxbackup: 999,
+	}
+
+	if _, err := os.Lstat(w.filename); err == nil {
+		_, ctime, _, err := support.GetStatTime(w.filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
+			return nil
+		}
+		w.daily_opendaystr = ctime.Format("2006-01-02")
+		w.maxlines_curlines = support.GetLines(w.filename)
+		w.maxsize_cursize = support.GetSize(w.filename)
 	}
 
 	// open the file for the first time
@@ -76,19 +88,6 @@ func NewFileLogWriter(fname string, rotate bool) *FileLogWriter {
 		fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
 		return nil
 	}
-
-	// get create time
-	if w.daily_opendaystr == "" {
-		_, ctime, _, err := support.GetStatTime(w.filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "FileLogWriter(%q): %s\n", w.filename, err)
-			return nil
-		}
-		w.daily_opendaystr = ctime.Format("2006-01-02")
-	}
-
-	w.maxlines_curlines = support.GetLines(w.filename)
-	w.maxsize_cursize = support.GetSize(w.filename)
 
 	go func() {
 		defer func() {
@@ -161,7 +160,6 @@ func (w *FileLogWriter) intRotate() error {
 				for ; err == nil && num <= 999; num++ {
 					fname = w.filename + fmt.Sprintf(".%03d", num)
 					nfname := w.filename + fmt.Sprintf(".%s.%03d", w.daily_opendaystr, num)
-					//fname = w.filename + fmt.Sprintf(".%s.%03d", w.daily_opendaystr, num)
 					_, err = os.Lstat(fname)
 					if err == nil {
 						os.Rename(fname, nfname)
@@ -188,7 +186,9 @@ func (w *FileLogWriter) intRotate() error {
 			} else {
 				// first time init logger, reuse old log file if exist, here we do nothing
 			}
-			w.file.Close()
+
+			if w.file != nil { w.file.Close() }
+
 			// Rename the file to its newfound home
 			if fname != "" {
 				err = os.Rename(w.filename, fname)
@@ -281,8 +281,8 @@ func (w *FileLogWriter) SetRotate(rotate bool) *FileLogWriter {
 
 // NewXMLLogWriter is a utility method for creating a FileLogWriter set up to
 // output XML record log messages instead of line-based ones.
-func NewXMLLogWriter(fname string, rotate bool) *FileLogWriter {
-	return NewFileLogWriter(fname, rotate).SetFormat(
+func NewXMLLogWriter(fname string, rotate, daily bool) *FileLogWriter {
+	return NewFileLogWriter(fname, rotate, daily).SetFormat(
 		`	<record level="%L">
 		<timestamp>%D %T</timestamp>
 		<source>%S</source>

@@ -117,7 +117,7 @@ func (log Logger) LoadConfiguration(filename string) {
 	}
 
 	log.Config(contents)
-
+	fd.Close()
 }
 
 func convertLevel(level string) (lvl Level, bad bool) {
@@ -199,7 +199,7 @@ func xmlToFileLogWriter(excludes []string, props []xmlProperty, enabled bool) (*
 			abspath, _ := exec.LookPath(os.Args[0])
 			dir := filepath.Dir(abspath)
 			file = filepath.Join(dir, strings.Trim(prop.Value, " \r\n"))
-			if _, err := os.Stat(filepath.Dir(file)); os.IsNotExist(err) {
+			if _, err := os.Lstat(filepath.Dir(file)); os.IsNotExist(err) {
 				os.MkdirAll(filepath.Dir(file), os.ModeDir|os.ModePerm)
 			}
 		case "format":
@@ -228,11 +228,11 @@ func xmlToFileLogWriter(excludes []string, props []xmlProperty, enabled bool) (*
 		return nil, true
 	}
 
-	flw := NewFileLogWriter(file, rotate)
+	flw := NewFileLogWriter(file, rotate, daily)
 	flw.SetFormat(format)
 	flw.SetRotateLines(maxlines)
 	flw.SetRotateSize(int64(maxsize))
-	flw.SetRotateDaily(daily)
+	//flw.SetRotateDaily(daily)
 	return flw, true
 }
 
@@ -274,10 +274,10 @@ func xmlToXMLLogWriter(excludes []string, props []xmlProperty, enabled bool) (*F
 		return nil, true
 	}
 
-	xlw := NewXMLLogWriter(file, rotate)
+	xlw := NewXMLLogWriter(file, rotate, daily)
 	xlw.SetRotateLines(maxrecords)
 	xlw.SetRotateSize(int64(maxsize))
-	xlw.SetRotateDaily(daily)
+	//xlw.SetRotateDaily(daily)
 	return xlw, true
 }
 
