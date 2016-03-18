@@ -79,6 +79,7 @@ func NewFileLogWriter(fname string, rotate, daily bool) *FileLogWriter {
 			return nil
 		}
 		w.daily_opendaystr = ctime.Format("2006-01-02")
+		w.daily_opendaystr = "2016-03-17"
 		w.maxlines_curlines = support.GetLines(w.filename)
 		w.maxsize_cursize = support.GetSize(w.filename)
 	}
