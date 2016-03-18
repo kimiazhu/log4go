@@ -79,7 +79,6 @@ func NewFileLogWriter(fname string, rotate, daily bool) *FileLogWriter {
 			return nil
 		}
 		w.daily_opendaystr = ctime.Format("2006-01-02")
-		w.daily_opendaystr = "2016-03-17"
 		w.maxlines_curlines = support.GetLines(w.filename)
 		w.maxsize_cursize = support.GetSize(w.filename)
 	}
@@ -177,8 +176,8 @@ func (w *FileLogWriter) intRotate() error {
 				// maxlines or maxsize reached, create new log and rename the old
 				num = w.maxbackup - 1
 				for ; num >= 1; num-- {
-					fname = w.filename + fmt.Sprintf(".%d", num)
-					nfname := w.filename + fmt.Sprintf(".%d", num+1)
+					fname = w.filename + fmt.Sprintf(".%03d", num)
+					nfname := w.filename + fmt.Sprintf(".%03d", num+1)
 					_, err = os.Lstat(fname)
 					if err == nil {
 						os.Rename(fname, nfname)
