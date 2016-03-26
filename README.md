@@ -49,7 +49,6 @@ I hava change some features and done with some bugfixes. Include:
 import log "github.com/kimiazhu/log4go"
 
 ### TODO:
-- when the server restart, the maxline and the maxsize maybe exceeded??
 
 ### Acknowledgements:
 - pomack
