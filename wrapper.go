@@ -344,3 +344,43 @@ func Recover(arg0 interface{}, args ...interface{}) {
 		}
 	}
 }
+
+func IsFinestEnabled() bool {
+	return isLevelEnabled(FINEST)
+}
+
+func IsFineEnabled() bool {
+	return isLevelEnabled(FINE)
+}
+
+func IsDebugEnabled() bool {
+	return isLevelEnabled(DEBUG)
+}
+
+func IsTraceEnabled() bool {
+	return isLevelEnabled(TRACE)
+}
+
+func IsInfoEnabled() bool {
+	return isLevelEnabled(INFO)
+}
+
+func IsWarnEnabled() bool {
+	return isLevelEnabled(WARNING)
+}
+
+func IsErrorEnabled() bool {
+	return isLevelEnabled(ERROR)
+}
+
+func isLevelEnabled(lvl Level) bool {
+	enabled := false
+	for _, filt := range Global {
+		if lvl >= filt.Level {
+			// return true if any filt matched
+			enabled = true
+			break
+		}
+	}
+	return enabled
+}
