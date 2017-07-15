@@ -16,6 +16,7 @@ const (
 )
 
 type formatCacheType struct {
+	LastUpdateNanoSec    int64
 	LastUpdateSeconds    int64
 	shortTime, shortDate string
 	longTime, longDate   string
@@ -24,7 +25,7 @@ type formatCacheType struct {
 var formatCache = &formatCacheType{}
 
 // Known format codes:
-// %T - Time (15:04:05 MST)
+// %T - Time (15:04:05.000000000 MST)
 // %t - Time (15:04)
 // %D - Date (2006/01/02)
 // %d - Date (01/02/06)
@@ -42,14 +43,20 @@ func FormatLogRecord(format string, rec *LogRecord) string {
 	}
 
 	out := bytes.NewBuffer(make([]byte, 0, 64))
-	secs := rec.Created.UnixNano() / 1e9
+
+	nanosec := rec.Created.UnixNano()
+	secs := nanosec / 1e9
+	//if strings.Contains(format, "%T") {
+	//	secs = rec.Created.UnixNano()
+	//}
 
 	cache := *formatCache
-	if cache.LastUpdateSeconds != secs {
+	if cache.LastUpdateNanoSec != nanosec {
 		month, day, year := rec.Created.Month(), rec.Created.Day(), rec.Created.Year()
 		hour, minute, second, nanosce := rec.Created.Hour(), rec.Created.Minute(), rec.Created.Second(), rec.Created.Nanosecond()
 		zone, _ := rec.Created.Zone()
 		updated := &formatCacheType{
+			LastUpdateNanoSec: nanosec,
 			LastUpdateSeconds: secs,
 			shortTime:         fmt.Sprintf("%02d:%02d", hour, minute),
 			shortDate:         fmt.Sprintf("%02d/%02d/%02d", day, month, year%100),
